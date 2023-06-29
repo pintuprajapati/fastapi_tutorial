@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Optional
 from fastapi import FastAPI
 
 # Instance of FastAPI()
@@ -7,6 +8,8 @@ app = FastAPI()
 @app.get("/", description="This is our first route")
 async def root():
     return {"message": "Hellow world"}
+
+##### Path Parameters #####
 
 # create endpoint in order because FastAPI executes endpoints orderwise
 # specify the static endpoint first and then dynamic or the other way around (as per requirement)
@@ -45,3 +48,17 @@ async def get_food(food_name: FoodEnum):
         return {"food_name": food_name, "message": "You eat fruits, so you are sweet and healthy"}
     
     return {"food_name": food_name, "message": "I like chocolates"}
+
+
+##### Query Parameters #####
+# (http://127.0.0.1:8000/items/1?q=hi&short=True)
+@app.get("/items/{item_id}")
+async def get_item(item_id: str, q: Optional[str] = None, short: bool = False):
+    item = {"item_id": item_id}
+    if q:
+        item.update({"q": q})
+    if not short:
+        item.update({
+            "description": "The brown fox jumps over the lazy dog"
+        })
+    return item
