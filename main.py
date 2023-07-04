@@ -1,6 +1,6 @@
 from enum import Enum
-from typing import Optional
-from fastapi import FastAPI
+from typing import Optional, List
+from fastapi import FastAPI, Query
 from pydantic import BaseModel
 
 # Instance of FastAPI()
@@ -50,8 +50,7 @@ async def get_food(food_name: FoodEnum):
     
     return {"food_name": food_name, "message": "I like chocolates"}
 
-
-##### Query Parameters #####
+################### Query Parameters ###################
 # (http://127.0.0.1:8000/items/1?q=hi&short=True)
 @app.get("/items/{item_id}")
 async def get_item(item_id: str, q: Optional[str] = None, short: bool = False):
@@ -64,7 +63,7 @@ async def get_item(item_id: str, q: Optional[str] = None, short: bool = False):
         })
     return item
 
-##### Request Body #####
+################### Request Body ###################
 # pydantic model
 class Item(BaseModel):
     name: str
@@ -88,3 +87,27 @@ async def update_item(item_id: int, item: Item, q: Optional[str] = None):
     if q:
         result.update({"q": q})
     return result
+
+
+################### Query Parameters and String Validation ###################
+# python 3.8 => q: Optinal[List[str]] = Query()
+# python 3.10 => q: list[str] | None =  Query()
+"""
+API: http://127.0.0.1:8000/items?item-query=a&item-query=b
+"""
+@app.get("/items")
+async def read_items(
+    q: Optional[List[str]] = 
+    Query(
+        None, 
+        min_length=1, 
+        max_length=10, 
+        title="simple query string", 
+        description="this is simple query description", 
+        alias="item-query")
+    ):
+
+    results = { "items": [{"item_id":"Foo"},{"item_id": "bar"}] }
+    if q:
+        results.update({"q": q})
+    return results
