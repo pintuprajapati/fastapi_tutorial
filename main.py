@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import Optional, List
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Path
 from pydantic import BaseModel
 
 # Instance of FastAPI()
@@ -108,6 +108,28 @@ async def read_items(
     ):
 
     results = { "items": [{"item_id":"Foo"},{"item_id": "bar"}] }
+    if q:
+        results.update({"q": q})
+    return results
+
+################### Path Parameters and Numeric Validation ###################
+"""
+API: http://127.0.0.1:8000/items?item-query=a&item-query=b
+"""
+@app.get("/item_validation/{item_id}")
+async def read_item_validation(
+    item_id: int = Path(..., title="random title"),
+    q: Optional[str] = 
+    Query(
+        "Hello", 
+        gt=1, 
+        le=100, 
+        title="simple query string", 
+        description="this is simple query description", 
+        alias="item-query")
+    ):
+
+    results = { "item_id": {item_id} }
     if q:
         results.update({"q": q})
     return results
